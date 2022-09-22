@@ -27,7 +27,7 @@ def create_graph(path: str):
             time_nums = subplot.x.tolist()
             titles.append(f'{math.ceil(time_nums[len(time_nums) - 1])} minute sample')
 
-        fig = make_subplots(rows=len(subplots), cols=1, x_title='Time (minutes)', y_title='Energy',
+        fig = make_subplots(rows=len(subplots), cols=1, x_title='Time (minutes)', y_title='Noise Level',
                             subplot_titles=titles, shared_xaxes=True)
         row = 1
         for subplot in subplots:
@@ -88,8 +88,8 @@ def parse_data(path: str) -> List[object]:
             write_json_file(os.path.join(path, name + '.json'), wav_time, wave_energy)
 
             obj = {
-                "time": wav_time,
-                "energy": wave_energy,
+                "Time (minutes)": wav_time,
+                "Energy": wave_energy,
                 "date": datetime.strptime(name, date_fmt),
             }
 
@@ -129,7 +129,7 @@ def write_json_file(file: str, time: np.ndarray, energy: np.ndarray):
         "time": time.tolist(),
         "energy": energy.tolist(),
     }
-    json_object = json.dumps(dictionary, indent=4)
+    json_object = json.dumps(dictionary)
 
     with open(file, "w") as outfile:
         outfile.write(json_object)
