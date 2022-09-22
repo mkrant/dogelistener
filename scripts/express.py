@@ -25,10 +25,10 @@ def create_graph(path: str):
         titles = []
         for subplot in subplots:
             time_nums = subplot.x.tolist()
-            titles.append(f'{math.ceil(time_nums[len(time_nums) - 1])} minutes')
+            titles.append(f'{math.ceil(time_nums[len(time_nums) - 1])} minute sample')
 
         fig = make_subplots(rows=len(subplots), cols=1, x_title='Time (minutes)', y_title='Energy',
-                            subplot_titles=titles)
+                            subplot_titles=titles, shared_xaxes=True)
         row = 1
         for subplot in subplots:
             fig.add_trace(subplot, row=row, col=1)
@@ -49,7 +49,7 @@ def create_subplots(raw_runs: []) -> List[go.Scatter]:
     for run in raw_runs:
         subplots.append(go.Scatter(
             name=run['date'].strftime("%b %d %Y"),
-            x=run["Time (sec)"],
+            x=run["Time (minutes)"],
             y=run["Energy"],
         ))
 
@@ -74,7 +74,7 @@ def parse_data(path: str) -> List[object]:
             time, energy = read_json_file(os.path.join(path, file))
 
             obj = {
-                "Time (sec)": time,
+                "Time (minutes)": time,
                 "Energy": energy,
                 "date": datetime.strptime(name, date_fmt),
             }
@@ -106,7 +106,6 @@ def read_wav_file(file: str) -> (np.ndarray, np.ndarray):
     duration = len(s) / float(fs)
     print(f'duration = {duration} seconds')
 
-    # extract short-term features using a 50msec non-overlapping windows
     win, step = 1, 1
     [f, fn] = aF.feature_extraction(s, fs, int(fs * win),
                                     int(fs * step))
@@ -193,71 +192,3 @@ def modify_html(page: int):
 
 
 create_graph('data/barkley')
-
-exit(0)
-
-file = "data/barkley/09-16-2022_13-17-44.wav"
-time, energy = read_wav_file(file)
-
-df = pd.DataFrame({
-    "Time (sec)": time,
-    "Energy": energy,
-})
-
-fig = make_subplots(rows=10, cols=1)
-fig.add_trace(go.Scatter(
-    name="Sept 1",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=1, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 2",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=2, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 3",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=3, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 4",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=4, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 5",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=5, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 6",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=6, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 7",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=7, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 8",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=8, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 9",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=9, col=1)
-fig.add_trace(go.Scatter(
-    name="Sept 10",
-    x=df["Time (sec)"],
-    y=df["Energy"],
-), row=10, col=1)
-fig.show()
-
-# Plotly Express
-
-pio.write_html(fig, 'backend/static/data/1/index.html', auto_open=True)
-
