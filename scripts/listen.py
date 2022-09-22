@@ -14,7 +14,7 @@ now = datetime.now()
 dt_string = now.strftime("%m-%d-%Y_%H-%M-%S")
 
 person = "barkley"
-filename = f'../data/{person}/{dt_string}.wav'
+filename = f'data/{person}/{dt_string}.wav'
 
 p = pyaudio.PyAudio()  # Create an interface to PortAudio
 

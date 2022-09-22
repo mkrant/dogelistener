@@ -5,12 +5,36 @@ Listen and track your doge.
 ## Run
 
 ```bash
-cd scripts
-pip install -r requirements.txt
+pip install -r scripts/requirements.txt
+
+# Capture audio until max time reached or cancelled (Ctrl + C)
+python scripts/listen.py
+
+# Process audio, create graphs and html files
+python scripts/express.py
 ```
 
 Resolve missing pip packages manually, requirements.txt is not up to date.
 
-Had to clone PortAudio and build from source since it was failing to install.
+Some manual things I had to do:
 
-I had to clone pyAudioAnalysis locally and install those pip requirements.
+* Clone PortAudio and build from source since it was failing to install with brew
+* Clone pyAudioAnalysis locally and install those pip requirements
+
+## Go server
+
+```bash
+go build -o server backend/main.go
+```
+
+## AWS Instance
+
+```bash
+# scp the whole backend folder originally
+scp -i ~/.ssh/aws/key -r backend ec2-user@35.91.124.34:/home/ec2-user
+
+# after each run, scp the static data again
+scp -i ~/.ssh/aws/key -r backend/static ec2-user@35.91.124.34:/home/ec2-user/backend
+```
+
+http://localhost:3000

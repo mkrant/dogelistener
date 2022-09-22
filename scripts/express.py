@@ -37,7 +37,7 @@ def create_graph(path: str):
         fig.update_layout(title_text=f'Barkley Barking {subplots[0].name} to {subplots[len(subplots) - 1].name}')
 
         fig.show()
-        pio.write_html(fig, f'../backend/static/data/{page}/index.html')
+        pio.write_html(fig, f'backend/static/data/{page}/index.html')
         modify_html(page)
         page += 1
 
@@ -143,7 +143,7 @@ def chunks(lst, n) -> []:
 
 
 def modify_html(page: int):
-    with open(f'../backend/static/data/{page}/index.html', 'r') as file:
+    with open(f'backend/static/data/{page}/index.html', 'r') as file:
         html_doc = file.read()
 
         soup = BeautifulSoup(html_doc, 'html.parser')
@@ -188,15 +188,15 @@ def modify_html(page: int):
 
         bodyTag.insert(0, divTag)
 
-    with open(f'../backend/static/data/{page}/index.html', "w") as wfile:
+    with open(f'backend/static/data/{page}/index.html', "w") as wfile:
         wfile.write(str(soup))
 
 
-create_graph('../data/barkley')
+create_graph('data/barkley')
 
 exit(0)
 
-file = "../data/barkley/09-16-2022_13-17-44.wav"
+file = "data/barkley/09-16-2022_13-17-44.wav"
 time, energy = read_wav_file(file)
 
 df = pd.DataFrame({
@@ -259,5 +259,5 @@ fig.show()
 
 # Plotly Express
 
-pio.write_html(fig, '../backend/static/data/1/index.html', auto_open=True)
+pio.write_html(fig, 'backend/static/data/1/index.html', auto_open=True)
 
