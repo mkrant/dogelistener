@@ -29,6 +29,8 @@ go build -o server backend/main.go
 
 ## AWS Instance
 
+[AWS instance file server](http://ec2-35-91-124-34.us-west-2.compute.amazonaws.com)
+
 ```bash
 # scp the whole backend folder originally
 scp -i ~/.ssh/aws/key -r backend ec2-user@35.91.124.34:/home/ec2-user
