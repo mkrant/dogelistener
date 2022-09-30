@@ -18,7 +18,8 @@ def create_graph(path: str):
     raw_runs = parse_data(path)
     subplots_all = create_subplots(raw_runs)
 
-    subplot_2d = chunks(subplots_all, 10)
+    max_samples_per_page = 5
+    subplot_2d = chunks(subplots_all, max_samples_per_page)
     page = 1
 
     for subplots in subplot_2d:
@@ -28,7 +29,7 @@ def create_graph(path: str):
             titles.append(f'{math.ceil(time_nums[len(time_nums) - 1])} minute sample')
 
         fig = make_subplots(rows=len(subplots), cols=1, x_title='Time (minutes)', y_title='Noise Level',
-                            subplot_titles=titles, shared_xaxes=True)
+                            subplot_titles=titles, shared_xaxes=True, shared_yaxes='all')
         row = 1
         for subplot in subplots:
             fig.add_trace(subplot, row=row, col=1)
