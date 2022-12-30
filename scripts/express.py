@@ -4,6 +4,7 @@ import plotly.io as pio
 import plotly.express as px
 from pyAudioAnalysis import ShortTermFeatures as aF
 from pyAudioAnalysis import audioBasicIO as aIO
+from pyAudioAnalysis import audioAnalysis as aa
 import plotly.graph_objects as go
 import numpy as np
 import json
@@ -37,7 +38,9 @@ def create_graph(path: str):
 
         fig.update_layout(title_text=f'Barkley Barking {subplots[0].name} to {subplots[len(subplots) - 1].name}')
 
-        fig.show()
+        if page == 1:
+            fig.show()
+
         pio.write_html(fig, f'backend/static/data/{page}/index.html')
         modify_html(page)
         page += 1
@@ -103,6 +106,7 @@ def read_wav_file(file: str) -> (np.ndarray, np.ndarray):
     # read audio data from file
     # (returns sampling freq and signal as a numpy array)
     fs, s = aIO.read_audio_file(file)
+
     # print duration in seconds:
     duration = len(s) / float(fs)
     print(f'duration = {duration} seconds')

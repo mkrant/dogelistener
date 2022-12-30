@@ -18,7 +18,7 @@ filename = f'data/{person}/{dt_string}.wav'
 
 p = pyaudio.PyAudio()  # Create an interface to PortAudio
 
-maxDurationSeconds = 7200 # 1 hour
+maxDurationSeconds = 15800 # 1 hour
 print(f'Recording for maximum {maxDurationSeconds / 60} minutes ({maxDurationSeconds} seconds). Ctrl + C to stop')
 
 stream = p.open(format=sample_format,
