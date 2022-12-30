@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "github.com/mkrant/dogelistener/internal/server/api";
+
+// The greeting service definition.
+service DogeServer {
+  // Sends a greeting
+  rpc Connect (stream Request) returns (stream Response) {}
+}
+
+// The request message containing the user's name.
+message Request {
+  oneof type {
+    Ping ping = 1;
+  }
+}
+
+// The response message containing the greetings
+message Response {
+  oneof type {
+    Pong pong = 1;
+  }
+}
+
+message Ping {}
+message Pong {}
