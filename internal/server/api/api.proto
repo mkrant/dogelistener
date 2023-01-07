@@ -12,6 +12,7 @@ service DogeServer {
 message Request {
   oneof type {
     Ping ping = 1;
+    RunData run_data = 2;
   }
 }
 
@@ -19,8 +20,15 @@ message Request {
 message Response {
   oneof type {
     Pong pong = 1;
+    StartRun start_run = 2;
+    EndRun end_run = 3;
   }
 }
+
+message StartRun {}
+message EndRun {}
+
+message RunData {}
 
 message Ping {}
 message Pong {}

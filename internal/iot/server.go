@@ -9,10 +9,11 @@ type Server struct {
 
 type ServerConfig struct {
 	SocketAddr string
+	ServerAddr string
 }
 
 func NewServer(cfg ServerConfig) *Server {
-	return &Server{ss: NewSocketServer(cfg.SocketAddr)}
+	return &Server{ss: NewSocketServer(cfg.SocketAddr, cfg.ServerAddr)}
 }
 
 func (s *Server) Run() {

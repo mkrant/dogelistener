@@ -2,6 +2,11 @@
 
 Listen and track your doge.
 
+## Dependencies
+
+* Go
+* Python 3.8.16
+
 ## Run
 
 ```bash

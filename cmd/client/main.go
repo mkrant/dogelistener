@@ -10,7 +10,7 @@ import (
 const SockAddr = "/tmp/echo.sock"
 
 func main() {
-	srv := iot.NewServer(iot.ServerConfig{SocketAddr: SockAddr})
+	srv := iot.NewServer(iot.ServerConfig{SocketAddr: SockAddr, ServerAddr: "localhost:8081"})
 
 	go srv.Run()
 

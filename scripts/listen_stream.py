@@ -7,7 +7,7 @@ import time
 import socket
 from datetime import datetime
 
-chunk = 1024  # Record in chunks of 1024 samples
+chunk = 8000  # Record in chunks of 1024 samples
 sample_format = pyaudio.paInt16  # 16 bits per sample
 channels = 1
 fs = 8000  # Record at 8000 samples per second *8 KHz
@@ -54,12 +54,10 @@ try:
                 'filename': filename
             }
         }
-        data = json.dumps(payload)
+        data = json.dumps(payload) + "\n"
         sock.sendall(bytes(data, 'utf-8'))
 
         num += 1
-
-        exit(0)
 
         if time.time() - start > maxDurationSeconds:
             print("Max time hit, all done")
@@ -67,6 +65,7 @@ try:
 except KeyboardInterrupt:
     print("Cancelled, all done")
 
+sock.close()
 
 # Stop and close the stream
 stream.stop_stream()

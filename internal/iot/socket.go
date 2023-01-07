@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
-	"github.com/mkrant/dogelistener/internal/recorder"
+	"github.com/mkrant/dogelistener/internal/iot/recorder"
 	"log"
 	"net"
 	"os"
@@ -35,10 +35,10 @@ type SocketServer struct {
 	recorder *recorder.Recorder
 }
 
-func NewSocketServer(addr string) *SocketServer {
+func NewSocketServer(sock, serverAddr string) *SocketServer {
 	return &SocketServer{
-		sockAddr: addr,
-		recorder: recorder.NewRecorder(),
+		sockAddr: sock,
+		recorder: recorder.NewRecorder(serverAddr),
 	}
 }
 
@@ -83,6 +83,8 @@ func (s *SocketServer) handleConn(c net.Conn) {
 				log.Printf("Invalid socket message json: %v", err)
 				continue
 			}
+
+			log.Printf("Received message of type %q", msg.Type)
 
 			switch msg.Type {
 			case ProcessFileType:

@@ -4,7 +4,6 @@ import plotly.io as pio
 import plotly.express as px
 from pyAudioAnalysis import ShortTermFeatures as aF
 from pyAudioAnalysis import audioBasicIO as aIO
-from pyAudioAnalysis import audioAnalysis as aa
 import plotly.graph_objects as go
 import numpy as np
 import json
