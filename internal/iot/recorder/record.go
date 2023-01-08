@@ -12,15 +12,21 @@ type Record struct {
 	processScriptPath string
 
 	uploaderClient DataUploader
+	idx            int
 }
 
 func (r *Record) UploadData(t []float32, energy []float32, index string) error {
 	log.Println("Uploading data " + index)
 
-	err := r.uploaderClient.Send(&api.Request{Type: &api.Request_RunData{RunData: &api.RunData{}}})
+	err := r.uploaderClient.Send(&api.Request{Type: &api.Request_RunData{RunData: &api.RunData{
+		Frame: int32(r.idx),
+		Data:  energy[0],
+	}}})
 	if err != nil {
 		return err
 	}
+
+	r.idx++
 
 	return nil
 }

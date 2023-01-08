@@ -44,6 +44,17 @@ func (a *API) Connect(stream api.DogeServer_ConnectServer) error {
 			stream.Send(&api.Response{Type: &api.Response_Pong{Pong: &api.Pong{}}})
 		case *api.Request_RunData:
 			log.Println("Got run data", req)
+
+			run, ok := sess.CurrentRun()
+			if !ok {
+				log.Println("Not running so no data plz")
+				continue
+			}
+
+			if err := run.AddData(int(req.RunData.Frame), req.RunData.Data); err != nil {
+				log.Printf("Failed to add session data: %v", err)
+				continue
+			}
 		}
 
 	}

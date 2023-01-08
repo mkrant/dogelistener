@@ -6,12 +6,32 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
+	"time"
 )
 
 type SessionDTO struct {
-	ID        string    `json:"id"`
-	IsRunning bool      `json:"is_running"`
-	Data      []float32 `json:"data"`
+	ID        string `json:"id"`
+	IsRunning bool   `json:"is_running"`
+}
+
+type SessionDetailDTO struct {
+	ID        string   `json:"id"`
+	IsRunning bool     `json:"is_running"`
+	Runs      []RunDTO `json:"runs"`
+}
+
+type RunDTO struct {
+	ID              string    `json:"id"`
+	StartTime       time.Time `json:"start_time"`
+	DurationSeconds int       `json:"duration_seconds"`
+}
+
+type RunDetailDTO struct {
+	ID              string    `json:"id"`
+	StartTime       time.Time `json:"start_time"`
+	DurationSeconds int       `json:"duration_seconds"`
+	Live            bool      `json:"live"`
+	Data            []float32 `json:"data"`
 }
 
 type ErrorResponse struct {
@@ -24,6 +44,7 @@ func (a *API) RegisterRoutes(router *httprouter.Router) {
 	router.GET("/sessions/:id", a.GetSession)
 	router.POST("/sessions/:id/start", a.StartRun)
 	router.POST("/sessions/:id/stop", a.StopRun)
+	router.GET("/sessions/:id/runs/:run_id", a.GetRunDetail)
 }
 
 func (a *API) ListSessions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -34,7 +55,6 @@ func (a *API) ListSessions(w http.ResponseWriter, r *http.Request, _ httprouter.
 		dtos[i] = SessionDTO{
 			ID:        sessions[i].ID(),
 			IsRunning: sessions[i].IsRunning(),
-			Data:      sessions[i].Data(),
 		}
 	}
 
@@ -45,14 +65,62 @@ func (a *API) GetSession(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	sess, ok := a.sessManager.GetSession(ps.ByName("id"))
 	if !ok {
 		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(ErrorResponse{Message: "not found"})
+		json.NewEncoder(w).Encode(ErrorResponse{Message: "not found", StatusCode: 404})
 		return
 	}
 
-	dto := SessionDTO{
+	dto := SessionDetailDTO{
 		ID:        sess.ID(),
 		IsRunning: sess.IsRunning(),
-		Data:      sess.Data(),
+		Runs:      []RunDTO{},
+	}
+
+	for _, run := range sess.Runs() {
+		dur := time.Since(run.StartTime)
+		if !run.EndTime.IsZero() {
+			dur = run.EndTime.Sub(run.StartTime)
+		}
+		dto.Runs = append(dto.Runs, RunDTO{
+			ID:              run.ID,
+			StartTime:       run.StartTime,
+			DurationSeconds: int(dur.Seconds()),
+		})
+	}
+
+	json.NewEncoder(w).Encode(dto)
+}
+
+func (a *API) GetRunDetail(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	sess, ok := a.sessManager.GetSession(ps.ByName("id"))
+	if !ok {
+		w.WriteHeader(404)
+		json.NewEncoder(w).Encode(ErrorResponse{Message: "session not found", StatusCode: 404})
+		return
+	}
+
+	run, ok := sess.GetRun(ps.ByName("run_id"))
+	if !ok {
+		w.WriteHeader(404)
+		json.NewEncoder(w).Encode(ErrorResponse{Message: "run not found", StatusCode: 404})
+		return
+	}
+
+	dur := time.Since(run.StartTime)
+	live := true
+	if !run.EndTime.IsZero() {
+		dur = run.EndTime.Sub(run.StartTime)
+		live = false
+	}
+
+	dto := RunDetailDTO{
+		ID:              sess.ID(),
+		StartTime:       run.StartTime,
+		DurationSeconds: int(dur.Seconds()),
+		Live:            live,
+	}
+
+	for _, df := range run.Data() {
+		dto.Data = append(dto.Data, df.Value)
 	}
 
 	json.NewEncoder(w).Encode(dto)
@@ -63,13 +131,13 @@ func (a *API) StartRun(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	sess, ok := a.sessManager.GetSession(ps.ByName("id"))
 	if !ok {
 		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(ErrorResponse{Message: "not found"})
+		json.NewEncoder(w).Encode(ErrorResponse{Message: "not found", StatusCode: 404})
 		return
 	}
 
 	if sess.IsRunning() {
 		w.WriteHeader(400)
-		json.NewEncoder(w).Encode(ErrorResponse{Message: "already running"})
+		json.NewEncoder(w).Encode(ErrorResponse{Message: "already running", StatusCode: 400})
 		return
 	}
 

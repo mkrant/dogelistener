@@ -28,7 +28,10 @@ message Response {
 message StartRun {}
 message EndRun {}
 
-message RunData {}
+message RunData {
+  int32 frame = 1;
+  float data = 2;
+}
 
 message Ping {}
 message Pong {}
