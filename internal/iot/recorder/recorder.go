@@ -9,8 +9,10 @@ import (
 	"google.golang.org/grpc"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"sync"
+	"syscall"
 )
 
 type Recorder struct {
@@ -119,8 +121,13 @@ func (r *Recorder) StopRun() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	if err := r.listenerCmd.Process.Signal(syscall.SIGINT); err != nil {
+		log.Printf("Failed to sigint python script: %v", err)
+	}
+
 	if r.cancelCdm != nil {
-		r.cancelCdm()
+		// this was killing the process too fast
+		//r.cancelCdm()
 	}
 
 	r.listenerCmd = nil
@@ -139,6 +146,9 @@ func (r *Recorder) startListenerScript() error {
 
 	r.cancelCdm = cancel
 	r.listenerCmd = cmd
+
+	r.listenerCmd.Stdout = os.Stdout
+	r.listenerCmd.Stderr = os.Stdout
 
 	return nil
 }

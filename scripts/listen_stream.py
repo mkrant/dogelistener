@@ -16,6 +16,9 @@ maxDurationSeconds = 15800 # 1 hour
 now = datetime.now()
 dt_string = now.strftime("%m-%d-%Y_%H-%M-%S")
 
+person = "barkley"
+finalFile = f'data/{person}/{dt_string}.wav'
+
 p = pyaudio.PyAudio()  # Create an interface to PortAudio
 
 print(f'Recording for maximum {maxDurationSeconds / 60} minutes ({maxDurationSeconds} seconds). Ctrl + C to stop')
@@ -36,9 +39,13 @@ sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 server_address = '/tmp/echo.sock'
 sock.connect(server_address)
 
+frames = []  # Initialize array to store frames
+
 try:
     while 1:
-        data = [stream.read(chunk)]
+        rawData = stream.read(chunk)
+        data = [rawData]
+        frames.append(rawData)
 
         filename = "{:08d}.wav".format(num)
         wf = wave.open(f'scripts/tmp/{filename}', 'wb')
@@ -74,3 +81,15 @@ stream.close()
 p.terminate()
 
 print('Finished recording')
+
+f = open("demofile2.txt", "a")
+f.write("Now the file has more content!")
+f.close()
+
+# Save the recorded data as a WAV file
+wf = wave.open(finalFile, 'wb')
+wf.setnchannels(channels)
+wf.setsampwidth(p.get_sample_size(sample_format))
+wf.setframerate(fs)
+wf.writeframes(b''.join(frames))
+wf.close()

@@ -4,7 +4,7 @@ import wave
 import time
 from datetime import datetime
 
-chunk = 1024  # Record in chunks of 1024 samples
+chunk = 8000  # Record in chunks of 1024 samples
 sample_format = pyaudio.paInt16  # 16 bits per sample
 channels = 1
 
@@ -18,7 +18,7 @@ filename = f'data/{person}/{dt_string}.wav'
 
 p = pyaudio.PyAudio()  # Create an interface to PortAudio
 
-maxDurationSeconds = 15800 # 1 hour
+maxDurationSeconds = 7200
 print(f'Recording for maximum {maxDurationSeconds / 60} minutes ({maxDurationSeconds} seconds). Ctrl + C to stop')
 
 stream = p.open(format=sample_format,

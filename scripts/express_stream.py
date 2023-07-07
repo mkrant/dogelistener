@@ -10,8 +10,8 @@ import socket
 
 def crunch_file(file: str):
     wav_time, wave_energy = read_wav_file(file)
-    send_socket_msg(file, wav_time, wave_energy)
-    # write_json_file('out.json', wav_time, wave_energy)
+    # send_socket_msg(file, wav_time, wave_energy)
+    write_json_file('out.json', wav_time, wave_energy)
 
 
 def read_wav_file(file: str) -> (np.ndarray, np.ndarray):

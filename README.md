@@ -12,6 +12,8 @@ Listen and track your doge.
 ```bash
 pip install -r scripts/requirements.txt
 
+source scripts/venv/bin/activate
+
 # Capture audio until max time reached or cancelled (Ctrl + C)
 python scripts/listen.py
 

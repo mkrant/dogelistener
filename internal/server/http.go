@@ -9,12 +9,20 @@ import (
 	"time"
 )
 
+type SessionsDTO struct {
+	Data []SessionDTO `json:"data"`
+}
+
 type SessionDTO struct {
 	ID        string `json:"id"`
 	IsRunning bool   `json:"is_running"`
 }
 
 type SessionDetailDTO struct {
+	Data SessionDetail `json:"data"`
+}
+
+type SessionDetail struct {
 	ID        string   `json:"id"`
 	IsRunning bool     `json:"is_running"`
 	Runs      []RunDTO `json:"runs"`
@@ -24,9 +32,14 @@ type RunDTO struct {
 	ID              string    `json:"id"`
 	StartTime       time.Time `json:"start_time"`
 	DurationSeconds int       `json:"duration_seconds"`
+	Live            bool      `json:"live"`
 }
 
 type RunDetailDTO struct {
+	Data RunDetail `json:"data"`
+}
+
+type RunDetail struct {
 	ID              string    `json:"id"`
 	StartTime       time.Time `json:"start_time"`
 	DurationSeconds int       `json:"duration_seconds"`
@@ -39,17 +52,33 @@ type ErrorResponse struct {
 	StatusCode int    `json:"status_code"`
 }
 
+func CORSMiddleware(fn httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+		header := w.Header()
+		header.Set("Access-Control-Allow-Methods", "GET")
+		header.Set("Access-Control-Allow-Origin", "*")
+
+		fn(w, req, ps)
+	}
+}
+
 func (a *API) RegisterRoutes(router *httprouter.Router) {
-	router.GET("/sessions", a.ListSessions)
-	router.GET("/sessions/:id", a.GetSession)
-	router.POST("/sessions/:id/start", a.StartRun)
-	router.POST("/sessions/:id/stop", a.StopRun)
-	router.GET("/sessions/:id/runs/:run_id", a.GetRunDetail)
+	router.POST("/api/login", CORSMiddleware(a.ListSessions))
+	router.GET("/api/sessions", CORSMiddleware(a.ListSessions))
+	router.GET("/api/sessions/:id", CORSMiddleware(a.GetSession))
+	router.POST("/api/sessions/:id/start", CORSMiddleware(a.StartRun))
+	router.POST("/api/sessions/:id/stop", CORSMiddleware(a.StopRun))
+	router.GET("/api/sessions/:id/runs/:run_id", CORSMiddleware(a.GetRunDetail))
+}
+
+func (a *API) Login(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
 }
 
 func (a *API) ListSessions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	sessions := a.sessManager.Sessions()
 
+	resp := SessionsDTO{}
 	dtos := make([]SessionDTO, len(sessions))
 	for i := range sessions {
 		dtos[i] = SessionDTO{
@@ -58,7 +87,9 @@ func (a *API) ListSessions(w http.ResponseWriter, r *http.Request, _ httprouter.
 		}
 	}
 
-	json.NewEncoder(w).Encode(dtos)
+	resp.Data = dtos
+
+	json.NewEncoder(w).Encode(resp)
 }
 
 func (a *API) GetSession(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -69,7 +100,7 @@ func (a *API) GetSession(w http.ResponseWriter, r *http.Request, ps httprouter.P
 		return
 	}
 
-	dto := SessionDetailDTO{
+	dto := SessionDetail{
 		ID:        sess.ID(),
 		IsRunning: sess.IsRunning(),
 		Runs:      []RunDTO{},
@@ -77,17 +108,20 @@ func (a *API) GetSession(w http.ResponseWriter, r *http.Request, ps httprouter.P
 
 	for _, run := range sess.Runs() {
 		dur := time.Since(run.StartTime)
+		live := true
 		if !run.EndTime.IsZero() {
 			dur = run.EndTime.Sub(run.StartTime)
+			live = false
 		}
 		dto.Runs = append(dto.Runs, RunDTO{
 			ID:              run.ID,
 			StartTime:       run.StartTime,
 			DurationSeconds: int(dur.Seconds()),
+			Live:            live,
 		})
 	}
 
-	json.NewEncoder(w).Encode(dto)
+	json.NewEncoder(w).Encode(SessionDetailDTO{Data: dto})
 }
 
 func (a *API) GetRunDetail(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -112,7 +146,9 @@ func (a *API) GetRunDetail(w http.ResponseWriter, r *http.Request, ps httprouter
 		live = false
 	}
 
-	dto := RunDetailDTO{
+	fmt.Println(run)
+
+	dto := RunDetail{
 		ID:              sess.ID(),
 		StartTime:       run.StartTime,
 		DurationSeconds: int(dur.Seconds()),
@@ -123,7 +159,7 @@ func (a *API) GetRunDetail(w http.ResponseWriter, r *http.Request, ps httprouter
 		dto.Data = append(dto.Data, df.Value)
 	}
 
-	json.NewEncoder(w).Encode(dto)
+	json.NewEncoder(w).Encode(RunDetailDTO{Data: dto})
 }
 
 func (a *API) StartRun(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -147,7 +183,7 @@ func (a *API) StartRun(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	json.NewEncoder(w).Encode(map[string]any{})
 }
 
 func (a *API) StopRun(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -171,5 +207,5 @@ func (a *API) StopRun(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	json.NewEncoder(w).Encode(map[string]any{})
 }

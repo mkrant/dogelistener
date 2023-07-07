@@ -40,7 +40,7 @@ def create_graph(path: str):
         if page == 1:
             fig.show()
 
-        pio.write_html(fig, f'backend/static/data/{page}/index.html')
+        pio.write_html(fig, f'cmd/staticserver/static/data/{page}/index.html')
         modify_html(page)
         page += 1
 
@@ -146,7 +146,7 @@ def chunks(lst, n) -> []:
 
 
 def modify_html(page: int):
-    with open(f'backend/static/data/{page}/index.html', 'r') as file:
+    with open(f'cmd/staticserver/static/data/{page}/index.html', 'r') as file:
         html_doc = file.read()
 
         soup = BeautifulSoup(html_doc, 'html.parser')
@@ -191,7 +191,7 @@ def modify_html(page: int):
 
         bodyTag.insert(0, divTag)
 
-    with open(f'backend/static/data/{page}/index.html', "w") as wfile:
+    with open(f'cmd/staticserver/static/data/{page}/index.html', "w") as wfile:
         wfile.write(str(soup))
 
 
